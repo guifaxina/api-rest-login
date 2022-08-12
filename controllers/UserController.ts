@@ -1,13 +1,28 @@
 import { Request, Response } from "express";
+import User from "../models/User";
 
 class UserController {
-  register(request: Request, response: Response) {
-    console.log("Register");
-    response.send("reg");
+  async register(req: Request, res: Response) {
+    const require = req.body;
+
+    const user = new User({
+      username: require.username,
+      email: require.email,
+      password: require.password,
+    });
+    try {
+      const userSaved = await user.save();
+      res.send(userSaved);
+    } catch (error) {
+      res.status(400).json({
+        error,
+        message: "Registration failed",
+      });
+    }
   }
-  login(request: Request, response: Response) {
-    console.log("Login");
-    response.send("log");
+  async login(req: Request, res: Response) {
+    const foo = await User.findOne({ email: req.body.email })
+    res.send(foo);
   }
 }
 
