@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/User";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"
 
 class UserController {
   async register(req: Request, res: Response) {
@@ -23,12 +24,17 @@ class UserController {
   }
   async login(req: Request, res: Response) {
     const thisUser = await User.findOne({ email: req.body.email });
-    const comparePasswords = await bcrypt.compare(req.body.password, thisUser.password);
+    const comparePasswords = await bcrypt.compare(req.body.password, thisUser?.password);
     // Auth
     if (!comparePasswords) return res.status(400).send("Email or password incorrect");
     
+    const token = jwt.sign({ username: thisUser?.username, email: thisUser?.email }, process.env.TOKEN_SECRET)
+
+    res.header('authorization-token', token)
     res.send("User Logged");
   }
 }
+
+
 
 export default new UserController();
